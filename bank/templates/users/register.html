@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block my_script %}
+<link rel="stylesheet" href="/static/css/entry.css">
+<script src="https://unpkg.com/node-forge@0.7.0/dist/forge.min.js"></script>
+<script src="/static/js/register.js"></script>
+{% endblock my_script %}
+
+{% block title %}
+<title>register|RELIABLE BANK</title>
+{% endblock title %}
+
+{% block body_style %}
+	<body class="web-bg" background="/static/images/register-bg.jpg">
+{% endblock body_style %}
+
+<!--  color :
+#F2AF1D #D3D6C3
+#EE6A22 #5A5C4F
+#393043
+-->
+
+{% block body %}
+		<div class="container form-wrapper">
+			<div class="header" style="color:white">
+				<h2>
+					REGISTER
+				</h2>
+			</div>
+
+			<form method="post" action="/user/register_handle/">
+				<!-- {% csrf_token %} -->
+				<div class="form-group input-wrapper">
+					<div class="border-wrapper">
+						<input type="text" class="form-control border-item" name="username" placeholder="username">
+					</div>
+					<div class="border-wrapper">
+						<input type="email" class="form-control border-item" name="email" aria-describedby="emailHelp"
+						 placeholder="email">
+					</div>
+					<div class="border-wrapper">
+						<input id="password" type="password" class="form-control border-item" name="password" placeholder="password">
+					</div>
+					<div class="border-wrapper">
+						<input type="text" class="form-control border-item" name="real_name" placeholder="real name">
+					</div>
+					<div class="border-wrapper">
+						<input type="text" class="form-control border-item" name="id_number" placeholder="id number">
+					</div>
+					
+				</div>
+				<div align="center"><p style="color:white">{{errmsg}}</p></div>
+				
+				<div align="center">
+					<button id='registerBtn' type="submit" class="btn">create account</button>
+				</div>
+			</form>
+		</div>
+{% endblock body %}

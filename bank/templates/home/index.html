@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}
+<title>index|RELIABLE BANK</title>
+{% endblock title %}
+
+{% block my_script %}
+<link rel="stylesheet" href="/static/css/entry.css">
+{% endblock my_script %}
+
+{% block body_style%}
+<body class="web-bg" background="/static/images/index-bg.jpg">
+{% endblock body_style%}
+
+{% block body %}
+<div class="container text-white form-wrapper">
+    {% if request.session.islogin %}
+    <br>
+        <h1>Welcome, <em>{{ request.session.username }}</em></h1>
+        <hr>
+        <h2>
+            <div>
+                <a href="{% url 'user:check_account' %}">check account</a>
+            </div>
+            or
+            <a href="{% url 'user:logout' %}">logout</a>
+        </h2>
+
+    <br>
+    {% else %}
+        <hr />
+        <h1>Bank for Life and Nature</h1>
+        <hr align=center width=300 color=white size=1/>
+        <h2><a href="{% url 'user:register' %}">register</a> or <a href="{% url 'user:login' %}">login</a></h2>
+        <hr align=center width=300 size=1 />
+    {% endif %}
+
+</div>
+
+{% endblock body %}

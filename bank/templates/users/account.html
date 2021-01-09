@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/node-forge@0.7.0/dist/forge.min.js"></script>
+    <link rel="stylesheet" href="/static/css/account.css">
+    <script type="text/javascript" src="/static/js/account.js"></script>
+
+    <title>account|RELIABLE BANK</title>
+</head>
+<body class="web-bg" background="/static/images/index-bg.jpg">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="opacity: 100%;">
+        <a class="navbar-brand" href="{% url 'home:index' %}"><b>
+            <svg class="bi bi-brightness-high-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor"
+                 xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8" cy="8" r="4"/>
+                <path fill-rule="evenodd"
+                      d="M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+            </svg>
+            RELIABLE BANK</b></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a href="/user/register" class="btn btn-white">Sign up</a>
+        <a href="/user/login" class="btn btn-white">Sign in</a>
+    </nav>
+    
+
+    <div class="container-fluid header-card" >
+        <h1>ACCOUNT CENTER</h1>
+        <h2>welcome <i id='username'>{{ username }}</i></h2>
+        
+    </div>
+    <div class="container-fluid context-card shadow-lg p-3 mb-5  rounded">
+        <div class="row">
+            <div class="col-6 pt-3">
+                <table class="table table-active table-striped table-hover">
+                    <h1>OUTPUT</h1>
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>TO PAYEE</th>
+                            <th>ACCOUNT</th>
+                            <th>TIME</th>
+                        </tr>
+                    </thead>
+                    <tbody id="outputRecord">
+                        <!-- js to render -->
+                    </tbody>
+                </table>
+                
+            </div>
+            <div class="col-6 mt-5">
+                <h1>BALANCE: <i>{{ account_balance }}</i>￥</h1>
+                <button type="button" class="btn btn-green" data-toggle="modal" data-target="#exampleModal">Reload public key</button>
+                <div class="modal fade" style="color:black" id="exampleModal" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">UPLOAD PUBLIC KEY</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form id='fileForm'>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="newPublickey">
+                                        <label id="publickeyLabel" class="custom-file-label" for="newPublickey">Choose file</label>
+                                    </div>
+                                </form>
+                            </div>
+                            <div hidden id="uploadAlert" class="alert alert-success" role="alert">
+                                upload seccessfully.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button id="uploadPublicKeyBtn" type="button" class="btn btn-primary">Confirm</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h1>INPUT</h1>
+                <table class="table table-active table-striped table-hover">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th>FROM PAYER</th>
+                        <th>ACCOUNT</th>
+                        <th>TIME</th>
+                    </tr>
+                    </thead>
+                    <tbody id="inputRecord">
+                        <!-- js to render -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="col"></div>
+        </div>
+    </div>
+    
+
+</body>
+</html>

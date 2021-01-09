@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block my_script %}
+<script src="https://unpkg.com/node-forge@0.7.0/dist/forge.min.js"></script>
+<script src="https://cdn.bootcss.com/crypto-js/3.1.9-1/crypto-js.min.js"></script>
+
+<script src="/static/js/payment.js"></script>
+<link rel="stylesheet" href="/static/css/entry.css">
+{% endblock my_script %}
+
+{% block title %}
+<title>payment|RELIABLE BANK</title>
+{% endblock title %}
+
+{% block body_style %}
+<body class="web-bg" background="/static/images/login-bg.jpg">
+{% endblock body_style %}
+
+{% block body %}
+<div class="container form-wrapper" style="background-color:#393030">
+    <div class="header" style="color:white">
+        <h2>
+            LOGIN TO PAY
+        </h2>
+    </div>
+
+    <form id="payer_account" method="POST" action="/payment/check/">
+
+        <div class="form-group input-wrapper">
+            <div class="border-wrapper">
+                <input id='username' type="text" class="form-control border-item" 
+                name="username" placeholder="username"
+                style="background-color:#393030">
+            </div>
+            <div class="border-wrapper">
+                <input id='password' type="password" class="form-control border-item" name="password" placeholder="password"
+                style="background-color:#393030">
+            </div>
+            
+        </div>
+        <div align="center">
+            <input type="button" id="continueBtn" class="btn" data-toggle="modal"
+             data-target="#uploadPrivatekeyModal" value="CONTINUE"></input>
+        </div>
+        <br>
+    </form>
+    
+</div>
+<div class="modal fade" style="color:black" id="uploadPrivatekeyModal" role="dialog" 
+    aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">LOAD PRIVATE KEY</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id='fileForm'>
+                    <div class="custom-file">
+                        <input id="privatekey" type="file" class="custom-file-input">
+                        <label id="privatekeyLabel" class="custom-file-label" for="privatekey">Choose file</label>
+                        <br>
+                        <br>
+                        <input id="aesPasswd" type="password" class="form-control" placeholder="PAYING PASSWORD">
+                    </div>
+                </form>
+            </div>
+            <div hidden id="loadSucAlert" class="alert alert-success" role="alert">
+                load seccessfully.
+            </div>
+            <div hidden id="loadFailAlert" class="alert alert-danger" role="alert">
+                load fail.
+            </div>
+            <p align="center" id="showme" style="color: white;"></p>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button id="loadPrivateKeyBtn" type="button" class="btn btn-primary">Confirm</button>
+            </div>
+            
+        </div>
+    </div>
+</div>
+    
+{% endblock body %}
