@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/slide.js' %}"></script>
+    <script src="https://unpkg.com/node-forge@0.7.0/dist/forge.min.js"></script>
+    <title>bank</title>
+</head>
+<body>
+    login the bank!!
+    <form action="{TODO}", method="POST", id="fo">
+        {% csrf_token %}
+        <input type="text" name="username" id="username">
+        <input type="password" name="password" id="password">
+        <input id="submit_btn" type="button" name="login!!">
+    </form> 
+</body>
+<script>
+$(function () {
+    $("#submit_btn").click(function(e){
+
+        // Dual Signature
+        var create_time = window.opener.document.getElementById("create_time").innerHTML;
+        var order_id = window.opener.document.getElementById("order_id").innerHTML;
+        var book_name = window.opener.document.getElementById("book_name").innerHTML.replace(/<.+?>/gim,'');
+        var count = window.opener.document.getElementById("count").innerHTML;
+        var total = window.opener.document.getElementById("total").innerHTML.replace("元","CYN");
+        var book_amount = window.opener.document.getElementById("book_amount").innerHTML;
+        var ORDER_INFO = create_time+"\n"+order_id+"\n"+book_name+"*"+count+"\n总价："+total+"="+book_amount+"*"+count
+
+        var usrn = $("#username").val()
+        var pwd = $("#password").val()
+
+
+        var date = new Date();
+        var year = date.getFullYear();
+	    var month = date.getMonth()+1;//js中是从0开始所以要加1
+	    var day = date.getDate();
+	    var hour = date.getHours();
+	    var minute = date.getMinutes();
+	    var second = date.getSeconds();
+        var time = year+'/'+month+'/'+day+'/'+hour+':'+minute+':'+second
+
+        var PAY_INFO = time+"\n"+"userID:"+usrn+"\n"+"password:"+pwd+"\n"+"PAY "+total +" TO"+"\n"+"bank_account_for_X1do0"  // settings.py MY_ACCOUNT
+
+
+        // Create Base64 Object
+        var Base64={_keyStr:"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",encode:function(e){var t="";var n,r,i,s,o,u,a;var f=0;e=Base64._utf8_encode(e);while(f<e.length){n=e.charCodeAt(f++);r=e.charCodeAt(f++);i=e.charCodeAt(f++);s=n>>2;o=(n&3)<<4|r>>4;u=(r&15)<<2|i>>6;a=i&63;if(isNaN(r)){u=a=64}else if(isNaN(i)){a=64}t=t+this._keyStr.charAt(s)+this._keyStr.charAt(o)+this._keyStr.charAt(u)+this._keyStr.charAt(a)}return t},decode:function(e){var t="";var n,r,i;var s,o,u,a;var f=0;e=e.replace(/[^A-Za-z0-9+/=]/g,"");while(f<e.length){s=this._keyStr.indexOf(e.charAt(f++));o=this._keyStr.indexOf(e.charAt(f++));u=this._keyStr.indexOf(e.charAt(f++));a=this._keyStr.indexOf(e.charAt(f++));n=s<<2|o>>4;r=(o&15)<<4|u>>2;i=(u&3)<<6|a;t=t+String.fromCharCode(n);if(u!=64){t=t+String.fromCharCode(r)}if(a!=64){t=t+String.fromCharCode(i)}}t=Base64._utf8_decode(t);return t},_utf8_encode:function(e){e=e.replace(/rn/g,"n");var t="";for(var n=0;n<e.length;n++){var r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r)}else if(r>127&&r<2048){t+=String.fromCharCode(r>>6|192);t+=String.fromCharCode(r&63|128)}else{t+=String.fromCharCode(r>>12|224);t+=String.fromCharCode(r>>6&63|128);t+=String.fromCharCode(r&63|128)}}return t},_utf8_decode:function(e){var t="";var n=0;var r=c1=c2=0;while(n<e.length){r=e.charCodeAt(n);if(r<128){t+=String.fromCharCode(r);n++}else if(r>191&&r<224){c2=e.charCodeAt(n+1);t+=String.fromCharCode((r&31)<<6|c2&63);n+=2}else{c2=e.charCodeAt(n+1);c3=e.charCodeAt(n+2);t+=String.fromCharCode((r&15)<<12|(c2&63)<<6|c3&63);n+=3}}return t}}
+
+        //console.log(ORDER_INFO)
+        console.log(PAY_INFO)
+
+        // OI -> encode64 -> sha256 -> OI_hash
+        var md = forge.md.sha256.create();
+        md.update(Base64.encode(ORDER_INFO));
+        OI_hash = md.digest().toHex();
+
+        // PI -> encode64 -> sha256 -> PI_hash
+        var md = forge.md.sha256.create();
+        md.update(Base64.encode(PAY_INFO));
+        PI_hash = md.digest().toHex();
+
+        // m = SHA256(OI_hash||PI_hash)
+        var md = forge.md.sha256.create();
+        md.update(OI_hash + PI_hash);
+        m = md.digest().toHex()
+        //console.log("OI_hash:"+ OI_hash)
+        //console.log("PI_hash:"+ PI_hash)
+        //console.log("after sha256:"+m)
+
+        // DS = sign m using private key
+        var pemPublicKey = "-----BEGIN PUBLIC KEY-----\nMIIBCgKCAQEAwcQS+goKQ3q0csFggZy+6jtJ/4lQ2JeLsuhY2CmQ2Ss+meKmWLPtfQPhgDgo\n1/7BQDSWXdYSsB/zCPrHIYdSyZeDmx720k9/LqnqAecstDEGM8uH+NHuTDONGERFUNcxkNXr\n85BD7j3EQfuWNFew2K0vDjcd7W/LdNWMxTYckoNuomLR91uGfklUWyjTKx4QtDARv9BDFMEf\n4VuRBqoIGFX96XqjyGwxfiA9aHdIG3l+v20/xpB1NVEa8LCWZ2LoxE5sPQgiW4WtdaRoHm2R\nDSU0ldbA3rsxFSwSXrJ+YJGKVLxyEBVUYZZPD9NyAz6bdKYQnt+/a531YhLXFMlzRwIDAQAB\n-----END PUBLIC KEY-----\n"
+        var pemPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEogIBAAKCAQEAwcQS+goKQ3q0csFggZy+6jtJ/4lQ2JeLsuhY2CmQ2Ss+meKmWLPtfQPh\ngDgo1/7BQDSWXdYSsB/zCPrHIYdSyZeDmx720k9/LqnqAecstDEGM8uH+NHuTDONGERFUNcx\nkNXr85BD7j3EQfuWNFew2K0vDjcd7W/LdNWMxTYckoNuomLR91uGfklUWyjTKx4QtDARv9BD\nFMEf4VuRBqoIGFX96XqjyGwxfiA9aHdIG3l+v20/xpB1NVEa8LCWZ2LoxE5sPQgiW4WtdaRo\nHm2RDSU0ldbA3rsxFSwSXrJ+YJGKVLxyEBVUYZZPD9NyAz6bdKYQnt+/a531YhLXFMlzRwID\nAQABAoIBAAGctkOR+IEzbptVaBLONJy3VPKplPS47uUj7xDAZDJf4wLvc5VqYu5SaxUIZv/5\nNEVh5jbK90hbPVmybmMGX5dOsWF0BkIvJdUX3vV9/bL8c12fTT2XmqkanNZL2b1yNTBMK8QX\nZlRTblbnuFC6923RH3nCfg1bKrr8KLNM37cWjGNq64WFM+d9/DratrnHqX6cBT42WhstgFLV\nAamwqxoTBZg6HtXCnXTJcS+2GMZCPUtUr94p14B4v64T71z26SoLjSJVpUK7nNXGR16k8OYX\n9wbjJ/nAoPxVl2MjGNipdUXYMeci+AfXWjMSXPRMNev/7DB7HscYoTnVSEWMSxECgYEA7QLS\n1g57SUXRXhhO/hKSJrYJoU90gEdkFEJ89d3Qzm1BRZ72icNHpcbWceUAGOwSfO8WSdkYnLSL\nEBq3AGY7Z6Wzut+TV47xa4qAJaNGSZeUo9vU13L+50S15DkijkACqaGBK2YbVgN93ANtQ6rT\nNLFQkdU51lW8S9HC834UPf8CgYEA0UpHUrAE84I2uG3LggH5jEqpUTrp6iLZRc9c+S7o4XoZ\nXBcJ4FhrUg45Nq3H3rQdcVUmCm251ARjN4jidHmq7sYJgTkuuJYxvRDwRe7fraU9u7rP2rci\n45SdS2owBlKJeAIUffCvvHQL3hILSFe18mCOPy9hpg7C3W1U15+jWrkCgYB2A/bp4XIgLSSw\nftguiR6/KdunuAGhsmqx7917K8VCVIKw4ROPy24MrPKw6b9fqYUXMpHdmb04ommwTi0bhMxF\nsuvIvHUIn0O1MdTXaPKhyFmaMedMlJU6oSsVBiIfxN3Oi33fF0u7S6fK+uXYUOI0FaqxwwO2\npyBIfJ1fU0NPDwKBgEawyBZtzb5SJRl2PF7VO+ze6wG83HVw/+JMgCLKbW57R0WLopJcSyOU\nGk8Vs4TNYYR+NjMfjLzIHpsLaTHeRpYP3fX/0oAWewZZSk7UuEh2n7thBgPiB67G67olS8NW\n7YfTbAh9213T9I41mgn9Vj9fzawZ3Omx4q/X1ehey1ZBAoGAYWwbHFu6zsdZJ3i89i6uJfcC\nzte1ntDinRTgeSML8EKgq5aF2Gnrhw4reODs+aMCpVRX9VnjZ/W4ZLiiPJqXkEmhgNWneMJ+\nlgZsLv3ReFqQp8JNmtgx8yBDHxyrei5XMDgf6qHJ2pULIv1OccY9C4scHY7aX6G+Q9gF50eG\n9o8=\n-----END RSA PRIVATE KEY-----\n"
+
+        const privateKey = forge.pki.privateKeyFromPem(pemPrivateKey)
+        const publicKey = forge.pki.publicKeyFromPem(pemPublicKey)
+
+        var md = forge.md.sha256.create();
+        md.update(m)
+        var DUAL_SIG = window.btoa(privateKey.sign(md));
+        console.log("DS:"+DUAL_SIG);
+
+        alert("PAY_INFO:\n\n"+PAY_INFO+'\n\nORDER_INFO:\n\n'+ORDER_INFO)
+
+
+
+        //var verified = publicKey.verify(md.digest().bytes(), DUAL_SIG)
+        //console.log("Vrfy:"+verified);
+
+        // use bank PK to encrypt PI
+        var bankPublicKey = "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkXLAYu+vT/vcuXn5Mucq4Fl/rTvFV1VL6Eo15crLQ5CGvJBWkk5LxGyHnyrgxykdnhnqaJuKPezYP4SLfgpxlagQA8FavQJX5apWTQaLgEcIiDn8lLqUtrebwPM1IOQkIIWvP7vn32mZYTTT/7GK+KL+sHU/u8ZiqDK+zacOYrbmYlsx7PoXYOycWfPzhOmzXnp8YzNbYciPO7TcYDtHdytQR+tCwwGB07YuZZ4tFmBd0Vr+aqzW22CDg6GQJlt0Gu4Cj2kJFK0KCnzYzJjnwALQLRjCYs6Bxc6yufjoNfk6tUWl1z0EQ1MLvO8XyySzv0dr6XJurFZ+JztaFcTexwIDAQAB\n-----END PUBLIC KEY-----"
+        var bankPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEAkXLAYu+vT/vcuXn5Mucq4Fl/rTvFV1VL6Eo15crLQ5CGvJBWkk5LxGyHnyrgxykdnhnqaJuKPezYP4SLfgpxlagQA8FavQJX5apWTQaLgEcIiDn8lLqUtrebwPM1IOQkIIWvP7vn32mZYTTT/7GK+KL+sHU/u8ZiqDK+zacOYrbmYlsx7PoXYOycWfPzhOmzXnp8YzNbYciPO7TcYDtHdytQR+tCwwGB07YuZZ4tFmBd0Vr+aqzW22CDg6GQJlt0Gu4Cj2kJFK0KCnzYzJjnwALQLRjCYs6Bxc6yufjoNfk6tUWl1z0EQ1MLvO8XyySzv0dr6XJurFZ+JztaFcTexwIDAQABAoIBAGnwALyPA0vokI3vj1hKE2qxBVOx8zx2/gDE/JjQqlgdzmVNZCDQMlNxER8XZfzpr47WJWvnzjroZWFuMwOsq6prbK6viF2edVLsTEtx9u2Jz2cZhST2+RZUiXdyLUI1qTKe7FQpkuugyHyKs9bLBAOxBHyWCcPE7VrBC0RS5yFyI7XWJFvqQh+OaLBUSCdAlqQs7d8H4mNak3U/xdOcKyGG21X9oqgXKTZ4P713WaP8G5w1LR5BNPAQhgorkIoDpin/Dk+3wkmacGTgTBJQRaa4qZVxnlh7T3WVt+fpYkZVrmLB9tzCi2WatrPn+9ef3OVwR7dHwz9mOd3W9C226dECgYEA6tvF9WBTn7kD28aTKqjQgbNipJEA0JL8dw0jx/0L32Nb9kaeDgPIBjVofCeG0NpqlTbO6OAb5TaNWBBA8ujJj41uv3vpKdKIk0fwcr/PU1OEP11CkPmGGaV4cQNyANYgKATxVJGkSRQaRMZ8qFhrXcdzarsmhHXu5Ms4la0vL70CgYEAnoqNaogsliE39paiM1cfdWkLSFPS4RI84scNnVz2zQh7tyrhqaF+JPmQaVl1W6Mai01j3WdkvveGq6q3K4vInc4jBs1RddA87h+t9J47SZUaDLgi4sRT8AgyZuyBKhIjNT72mEOaz6unnoAfpxCq381jrLRScbsL6o5CGtM//tMCgYEAjHk9c2HVQsCn9SlV1vs4E4vXIXV1lkuEZDTgxPquwkOsuqZMXTeXyVbikvgVZBBwFaW9pn59UOELM7QtFN11yb4fkrqroI9Dj0xFHm1ptX5LqJbAfPQyaF6XpokYBDYO78DdE+c061zxxVcvMoYIWgQ1HY6pICtl40VGKAh5I8UCgYA9KZCC78PbqzcOz3AFxG+jeQHcRlJNeB67EjXDZrDjyokH0eg6681hcFHxAo0O7C56XUHQkWnBbnaq1XJSv1uG3ZaPsjfh7pMC/n+6piyTJ41kKMl0mG8VY+Ql5smxtEuW6BJ0DWi1AzDoKd+MMRbqvi7c2rgPnixrsbP461R99wKBgECq2KadxyWJPYRRt4rrPCxqQQIsVbkFtEp3Fvi7tVAeRiOUUqvoUE4w3HNQSgPbrD3FZAkmAukGi3r43Gi/OamtRLqaCu17oSQrTw2ilYoE8x2q327j9X2m40O4TpI57mMTeKuX87ugaHT75xGMFlKfN+UaO7Of1gxElxnTNAEd\n-----END RSA PRIVATE KEY-----"
+
+        const bankPriK = forge.pki.privateKeyFromPem(bankPrivateKey)
+        const bankPubK = forge.pki.publicKeyFromPem(bankPublicKey)
+
+        PI_to_send = btoa(bankPubK.encrypt(encodeURIComponent(PAY_INFO)));
+
+        // message sent to web server
+        var mes = ORDER_INFO + 'AAAAA' + PI_hash + 'AAAAA' + DUAL_SIG + 'AAAAA' + PI_to_send
+
+         $.ajax({
+            type: "post",
+            url: '/order/check_pay/',
+            data: {
+                    data: mes,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            dataType: "json",
+            success:function(data){
+                if (data.res == 3){
+                   alert(data.errmsg)
+                   // 重新刷新页面
+                   location.reload()
+              }
+              else{
+                   console.log("pay TODO")
+                   alert(data.errmsg)
+              }
+            },
+            error:function(data){
+                alert(data.errmsg)
+            }
+        });
+
+    });
+
+});
+</script>
+</html>
+
+
+<!--    const message = '要加密我了' // 原文长度有限制，而且中文还要url编码，所以不能加密太长的字符串。一般也只用来加密密码。-->
+<!--const publicKey = '-&#45;&#45;&#45;&#45;BEGIN PUBLIC KEY-&#45;&#45;&#45;&#45;\nMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCqM+l9ZWy1Frt6felFFLmfZNls\nVbU1dKpF8Rx83FtKCsztO5k/iV5N9BbfHFUg9Y40b/EK2j/BPc1xlLYAHMXn6563\nXCwZ4IuCxvfOwz9qT9gkKBxkI5b0rnikkSWTGlJEk2PdZ7Plc73Fa+bx3PvuKvMd\ncKWvd80+vt9+b/7hrwIDAQAB\n-&#45;&#45;&#45;&#45;END PUBLIC KEY-&#45;&#45;&#45;&#45;'-->
+<!--const publicK = forge.pki.publicKeyFromPem(publicKey)-->
+<!--const encrypted = publicK.encrypt(encodeURIComponent(message), 'RSA-OAEP') // 经过url编码，后端解密后需要url解码-->
+<!--console.log('密文：', encrypted) // 虽然乱码，但可以直接发给后端解密-->
+
+<!-- //var privateKey = pki.privateKeyFromPem(pemPrivateKey);-->
+<!--    var publicKey = pki.publicKeyFromPem(pemPublicKey);-->
+<!--    const { rsa, publicKeyToRSAPublicKeyPem, privateKeyToPem } = forge.pki-->
+<!--rsa.generateKeyPair({ bits: 2048, workers: 2 }, function (err, keypair) {-->
+<!--  if (err) {-->
+<!--    return-->
+<!--  }-->
+
+<!--  // 这里就生成了字符串的公钥和密钥了，可以把生成结果保存起来-->
+<!--  console.log({-->
+<!--    publicKey: publicKeyToRSAPublicKeyPem(keypair.publicKey, 72).replace(/\r/g, ''),-->
+<!--    privateKey: privateKeyToPem(keypair.privateKey, 72).replace(/\r/g, '')-->
+<!--  })-->
+<!--})-->
+
+
+<!--test-->
+<!--var bytes = "encrypt &lt;!&ndash;this";-->
+<!--        var encrypted = publicKey.encrypt(bytes);-->
+<!--        console.log(encrypted);-->
+<!--        //decrypt data with a private key (defaults to RSAES PKCS#1 v1.5)-->
+<!--        var decrypted = privateKey.decrypt(encrypted);-->
+<!--        console.log(decrypted)&ndash;&gt;-->
+
+<!--// 查询用户的支付结果-->
+<!--        $.post('/order/check_pay/', form, function (data) {-->
+<!--              if (data.res == 3){-->
+<!--                   alert('支付成功')-->
+<!--                   // 重新刷新页面-->
+<!--                   location.reload()-->
+<!--              }-->
+<!--              else{-->
+<!--                   console.log("pay TODO")-->
+<!--                   alert(data.errmsg)-->
+<!--              }-->
+<!--        })-->
+
+
+
+<!--        $("#fo").submit(function(e){-->
+<!--            $('#mes').val(DUAL_SIG);-->
+<!--        })-->
+
+
